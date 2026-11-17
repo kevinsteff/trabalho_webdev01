@@ -1,21 +1,18 @@
 :root {
     --cor-escura: #212529;
-    --cor-destaque: #d39e00;
-    --cor-fundo: #f5f6f7;
 }
 
 body {
-    background: var(--cor-fundo);
+    background: #fff;
     color: #212529;
 }
 
-.navbar,
-footer {
+.navbar {
     background: var(--cor-escura);
 }
 
 .inicio {
-    background: linear-gradient(115deg, #f8f9fa 0%, #fff 58%, #f6e8b1 100%);
+    background: #fff;
 }
 
 .inicio h1 {
@@ -24,7 +21,7 @@ footer {
 
 .inicio .text-uppercase,
 .texto-destaque {
-    color: #806000;
+    color: #495057;
 }
 
 .texto-suave {
@@ -32,14 +29,12 @@ footer {
 }
 
 .resumo,
-.painel,
-.filme {
+.painel {
     border: 1px solid #dee2e6;
-    box-shadow: 0 0.15rem 0.5rem rgb(33 37 41 / 5%);
 }
 
 .resumo .h2 {
-    color: #806000;
+    color: #212529;
 }
 
 .painel {
@@ -50,37 +45,27 @@ footer {
     white-space: nowrap;
 }
 
-.capa {
-    height: 125px;
-}
-
-.capa-1 {
-    background: linear-gradient(135deg, #51273f, #241426);
-}
-
-.capa-2 {
-    background: linear-gradient(135deg, #282047, #541e3b);
-}
-
-.capa-3 {
-    background: linear-gradient(135deg, #71394b, #34203a);
+.table-light {
+    --bs-table-bg: #fff;
+    --bs-table-color: #212529;
 }
 
 .faixa {
-    background: #e9ecef;
+    background: #fff;
 }
 
 footer {
-    color: #f8f9fa;
+    background: #fff;
+    color: #6c757d;
     font-size: 0.9rem;
 }
 
 @media (max-width: 576px) {
-    .inicio {
-        background: linear-gradient(160deg, #f8f9fa 0%, #fff 75%, #f6e8b1 100%);
-    }
-
     .inicio .lead {
         font-size: 1rem;
+    }
+
+    .table .btn {
+        margin-bottom: 0.25rem;
     }
 }
