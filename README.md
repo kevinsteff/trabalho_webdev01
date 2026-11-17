@@ -1,23 +1,49 @@
 # Locadora
 
-Projeto de uma locadora fictícia de filmes para maiores de 18 anos, feito para a disciplina de Desenvolvimento Web I.
+Projeto de locadora de filmes para a disciplina de Desenvolvimento Web I.
 
-## Para abrir
+## Acessar o site
 
-Abra `index.html` no navegador. É preciso estar conectado à internet para carregar o Bootstrap.
+URL do projeto após a primeira publicação: https://kevinsteff.github.io/trabalho_webdev01/
 
-## O que o sistema faz
+Para executar localmente, abra `index.html` no navegador. O Bootstrap é carregado pela internet.
 
-- Relaciona clientes, filmes e locações.
-- Cadastra, edita, lista, devolve e exclui locações.
-- Salva as locações no `localStorage` do navegador.
-- Pesquisa por cliente ou filme, filtra por situação e gênero e ordena os resultados.
-- Mostra a quantidade de cópias disponíveis de cada filme.
+## Funcionalidades
 
-Uma locação não pode começar em uma data futura, a devolução não pode ser antes da locação e o mesmo cliente não pode alugar novamente o mesmo filme antes de devolvê-lo. Locações devolvidas não podem ser reabertas.
+- Dashboard com quantidade de filmes, locações totais, locações em andamento e locações atrasadas.
+- Cadastro, edição, listagem, devolução e exclusão de locações.
+- Cadastro, edição, listagem e exclusão de filmes.
+- Pesquisa por cliente ou filme, filtros combinados por situação e gênero e ordenação.
+- Dados de filmes e locações guardados no `localStorage` do navegador.
+- Multa de R$ 2 por dia de atraso. Ao devolver o filme, o valor é calculado até a data da devolução.
+
+## Regras do sistema
+
+- A data de início da locação não pode estar no futuro e a devolução não pode ser antes do início.
+- O cliente não pode alugar novamente o mesmo filme antes de devolvê-lo.
+- O estoque não pode ficar abaixo da quantidade de locações em andamento.
+- Um filme ligado a qualquer locação não pode ser excluído, para manter o histórico.
+- Uma locação devolvida não pode ser reaberta.
+- Os dados ficam somente no navegador em que foram cadastrados; não há servidor ou conta de usuário.
+
+## Publicação no GitHub Pages
+
+O workflow em `.github/workflows/pages.yml` publica automaticamente o conteúdo do repositório quando há um push para a branch `etapa2`. Para conferir uma publicação, abra a aba **Actions** do GitHub e aguarde o workflow terminar. Nas configurações do repositório, em **Settings > Pages**, a origem deve estar definida como **GitHub Actions**.
+
+## Responsabilidades da equipe
+
+Substitua `[integrante]` pelos nomes antes da entrega:
+
+| Integrante | Responsabilidade |
+| --- | --- |
+| [integrante] | Dashboard, contadores e apresentação dos dados |
+| [integrante] | Cadastro e manutenção de filmes e locações |
+| [integrante] | Regras de negócio, validações e cálculo de multa |
+| [integrante] | Testes responsivos, documentação e publicação no GitHub Pages |
 
 ## Arquivos
 
-- `index.html`: estrutura da página e componentes Bootstrap.
-- `css/style.css`: estilos da locadora.
-- `js/main.js`: dados e interações da página.
+- `index.html`: estrutura e formulários da página.
+- `css/style.css`: estilos e ajuste para telas menores.
+- `js/main.js`: dados, regras e interações.
+- `.github/workflows/pages.yml`: publicação automática.
