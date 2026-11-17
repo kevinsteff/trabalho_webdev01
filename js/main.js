@@ -161,12 +161,12 @@ function renderizarLocacoes() {
 
     document.querySelector("#totalLocacoes").textContent = locacoes.length;
     document.querySelector("#locacoesAtivas").textContent = locacoes.filter((locacao) => !locacao.devolvidoEm).length;
+    document.querySelector("#locacoesAtrasadas").textContent = locacoes.filter((locacao) => obterSituacao(locacao) === "Atrasado").length;
     renderizarFilmes();
 }
 
 function renderizarFilmes() {
-    const filmesDisponiveis = filmes.filter((filme) => contarLocacoesAtivas(filme.id) < filme.estoque).length;
-    document.querySelector("#filmesDisponiveis").textContent = filmesDisponiveis;
+    document.querySelector("#totalFilmes").textContent = filmes.length;
 
     document.querySelector("#listaFilmes").innerHTML = filmes.map((filme) => {
         const disponiveis = filme.estoque - contarLocacoesAtivas(filme.id);
