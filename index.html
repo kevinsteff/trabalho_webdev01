@@ -170,6 +170,7 @@
                                     <th scope="col">Locação</th>
                                     <th scope="col">Devolução</th>
                                     <th scope="col">Situação</th>
+                                    <th scope="col">Multa</th>
                                     <th scope="col" class="text-end">Ações</th>
                                 </tr>
                             </thead>
@@ -182,9 +183,65 @@
 
         <section class="faixa py-5" id="catalogo">
             <div class="container">
-                <p class="text-uppercase small fw-semibold texto-destaque mb-1">Acervo</p>
-                <h2 class="h3 mb-4">Filmes cadastrados</h2>
-                <div class="row g-3" id="listaFilmes"></div>
+                <div class="mb-4">
+                    <p class="text-uppercase small fw-semibold texto-destaque mb-1">Acervo</p>
+                    <h2 class="h3 mb-1">Filmes cadastrados</h2>
+                    <p class="texto-suave mb-0">Cadastre títulos e acompanhe o estoque.</p>
+                </div>
+                <div id="mensagemFilmes" class="alert d-none" role="status" aria-live="polite"></div>
+                <div class="card painel mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h3 class="h5 mb-0" id="tituloFormularioFilme">Novo filme</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="formFilme" novalidate>
+                            <input type="hidden" id="filmeId">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-lg-4">
+                                    <label for="tituloFilme" class="form-label">Título</label>
+                                    <input class="form-control" id="tituloFilme" maxlength="60" required>
+                                    <div class="invalid-feedback">Informe o título do filme.</div>
+                                </div>
+                                <div class="col-sm-6 col-lg-3">
+                                    <label for="generoFilme" class="form-label">Gênero</label>
+                                    <input class="form-control" id="generoFilme" maxlength="30" required>
+                                    <div class="invalid-feedback">Informe o gênero do filme.</div>
+                                </div>
+                                <div class="col-sm-3 col-lg-2">
+                                    <label for="precoFilme" class="form-label">Preço (R$)</label>
+                                    <input class="form-control" type="number" id="precoFilme" min="0.01" step="0.01" required>
+                                    <div class="invalid-feedback">Informe um preço maior que zero.</div>
+                                </div>
+                                <div class="col-sm-3 col-lg-1">
+                                    <label for="estoqueFilme" class="form-label">Cópias</label>
+                                    <input class="form-control" type="number" id="estoqueFilme" min="1" step="1" required>
+                                    <div class="invalid-feedback">Informe pelo menos uma cópia.</div>
+                                </div>
+                                <div class="col-lg-2 d-flex gap-2">
+                                    <button class="btn btn-primary" type="submit" id="botaoSalvarFilme">Salvar</button>
+                                    <button class="btn btn-outline-secondary d-none" type="button" id="cancelarEdicaoFilme">Cancelar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="card painel">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Título</th>
+                                    <th scope="col">Gênero</th>
+                                    <th scope="col">Preço</th>
+                                    <th scope="col">Estoque</th>
+                                    <th scope="col">Disponíveis</th>
+                                    <th scope="col" class="text-end">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaFilmes"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </section>
     </main>

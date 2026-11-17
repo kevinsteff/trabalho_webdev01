@@ -5,15 +5,17 @@ const clientes = [
     { id: 4, nome: "Diego Costa" }
 ];
 
-const filmes = [
-    { id: 1, titulo: "Encontro Marcado", genero: "Romance", preco: 9.9, estoque: 3, capa: "capa-1" },
-    { id: 2, titulo: "Uma Noite em Paris", genero: "Drama", preco: 12, estoque: 2, capa: "capa-2" },
-    { id: 3, titulo: "Verão a Dois", genero: "Comédia", preco: 10, estoque: 2, capa: "capa-3" }
+const filmesIniciais = [
+    { id: 1, titulo: "Encontro Marcado", genero: "Romance", preco: 9.9, estoque: 3 },
+    { id: 2, titulo: "Uma Noite em Paris", genero: "Drama", preco: 12, estoque: 2 },
+    { id: 3, titulo: "Verão a Dois", genero: "Comédia", preco: 10, estoque: 2 }
 ];
 
 const chaveLocacoes = "locadora-locacoes";
+const chaveFilmes = "locadora-filmes";
 const menuPrincipal = document.querySelector("#menuPrincipal");
 const formLocacao = document.querySelector("#formLocacao");
+const formFilme = document.querySelector("#formFilme");
 const campoCliente = document.querySelector("#cliente");
 const campoFilme = document.querySelector("#filme");
 const campoDataInicio = document.querySelector("#dataInicio");
@@ -24,6 +26,20 @@ const filtroGenero = document.querySelector("#filtroGenero");
 const ordenacao = document.querySelector("#ordenacao");
 const listaLocacoes = document.querySelector("#listaLocacoes");
 const mensagem = document.querySelector("#mensagem");
+const mensagemFilmes = document.querySelector("#mensagemFilmes");
+
+function carregarFilmes() {
+    try {
+        const dadosSalvos = localStorage.getItem(chaveFilmes);
+        if (dadosSalvos === null) return filmesIniciais;
+        const filmesSalvos = JSON.parse(dadosSalvos);
+        return Array.isArray(filmesSalvos) ? filmesSalvos : filmesIniciais;
+    } catch (erro) {
+        return filmesIniciais;
+    }
+}
+
+let filmes = carregarFilmes();
 
 function carregarLocacoes() {
     try {
@@ -38,6 +54,10 @@ let locacoes = carregarLocacoes();
 
 function salvarLocacoes() {
     localStorage.setItem(chaveLocacoes, JSON.stringify(locacoes));
+}
+
+function salvarFilmes() {
+    localStorage.setItem(chaveFilmes, JSON.stringify(filmes));
 }
 
 function dataHoje() {
@@ -62,6 +82,16 @@ function formatarData(data) {
     return new Date(`${data}T12:00:00`).toLocaleDateString("pt-BR");
 }
 
+function escaparHTML(texto) {
+    return String(texto).replace(/[&<>"']/g, (caractere) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[caractere]);
+}
+
 function buscarCliente(id) {
     return clientes.find((cliente) => cliente.id === Number(id));
 }
@@ -76,6 +106,14 @@ function obterSituacao(locacao) {
     return "Alugado";
 }
 
+function calcularMulta(locacao) {
+    const dataReferencia = locacao.devolvidoEm || dataHoje();
+    const dataFim = new Date(`${locacao.dataFim}T00:00:00Z`).getTime();
+    const dataAtual = new Date(`${dataReferencia}T00:00:00Z`).getTime();
+    const diasAtrasados = Math.max(0, Math.floor((dataAtual - dataFim) / 86400000));
+    return diasAtrasados * 2;
+}
+
 function contarLocacoesAtivas(filmeId, ignorarId = null) {
     return locacoes.filter((locacao) =>
         locacao.filmeId === filmeId &&
@@ -85,21 +123,28 @@ function contarLocacoesAtivas(filmeId, ignorarId = null) {
 }
 
 function preencherOpcoes() {
+    campoCliente.innerHTML = '<option value="">Escolha um cliente</option>';
     clientes.forEach((cliente) => {
-        campoCliente.insertAdjacentHTML("beforeend", `<option value="${cliente.id}">${cliente.nome}</option>`);
+        campoCliente.insertAdjacentHTML("beforeend", `<option value="${cliente.id}">${escaparHTML(cliente.nome)}</option>`);
     });
 
+    campoFilme.innerHTML = '<option value="">Escolha um filme</option>';
     filmes.forEach((filme) => {
-        campoFilme.insertAdjacentHTML("beforeend", `<option value="${filme.id}">${filme.titulo} - R$ ${filme.preco.toFixed(2).replace(".", ",")}</option>`);
-        filtroGenero.insertAdjacentHTML("beforeend", `<option value="${filme.genero}">${filme.genero}</option>`);
+        campoFilme.insertAdjacentHTML("beforeend", `<option value="${filme.id}">${escaparHTML(filme.titulo)} - ${Number(filme.preco).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</option>`);
+    });
+
+    const generos = [...new Set(filmes.map((filme) => filme.genero))].sort();
+    filtroGenero.innerHTML = '<option value="todos">Todos os gêneros</option>';
+    generos.forEach((genero) => {
+        filtroGenero.insertAdjacentHTML("beforeend", `<option value="${escaparHTML(genero)}">${escaparHTML(genero)}</option>`);
     });
 }
 
-function mostrarMensagem(texto, tipo = "success") {
-    mensagem.textContent = texto;
-    mensagem.className = `alert alert-${tipo}`;
+function mostrarMensagem(texto, tipo = "success", destino = mensagem) {
+    destino.textContent = texto;
+    destino.className = `alert alert-${tipo}`;
 
-    window.setTimeout(() => mensagem.classList.add("d-none"), 4000);
+    window.setTimeout(() => destino.classList.add("d-none"), 4000);
 }
 
 function renderizarLocacoes() {
@@ -132,12 +177,13 @@ function renderizarLocacoes() {
     });
 
     if (resultado.length === 0) {
-        listaLocacoes.innerHTML = '<tr><td class="texto-suave text-center py-4" colspan="6">Nenhuma locação encontrada.</td></tr>';
+        listaLocacoes.innerHTML = '<tr><td class="texto-suave text-center py-4" colspan="7">Nenhuma locação encontrada.</td></tr>';
     } else {
         listaLocacoes.innerHTML = resultado.map((locacao) => {
             const cliente = buscarCliente(locacao.clienteId);
             const filme = buscarFilme(locacao.filmeId);
             const situacao = obterSituacao(locacao);
+            const multa = calcularMulta(locacao);
             const classeSituacao = situacao === "Alugado" ? "text-bg-success" :
                 situacao === "Atrasado" ? "text-bg-warning" : "text-bg-secondary";
             const botaoDevolver = locacao.devolvidoEm ? "" :
@@ -145,11 +191,12 @@ function renderizarLocacoes() {
 
             return `
                 <tr>
-                    <td>${cliente?.nome || "Cliente removido"}</td>
-                    <td>${filme?.titulo || "Filme removido"}<br><small class="texto-suave">${filme?.genero || ""}</small></td>
+                    <td>${escaparHTML(cliente?.nome || "Cliente removido")}</td>
+                    <td>${escaparHTML(filme?.titulo || "Filme removido")}<br><small class="texto-suave">${escaparHTML(filme?.genero || "")}</small></td>
                     <td>${formatarData(locacao.dataInicio)}</td>
                     <td>${formatarData(locacao.dataFim)}</td>
                     <td><span class="badge ${classeSituacao}">${situacao}</span></td>
+                    <td>${multa.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</td>
                     <td class="text-end text-nowrap">
                         ${botaoDevolver}
                         <button class="btn btn-sm btn-outline-primary me-1" type="button" data-acao="editar" data-id="${locacao.id}">Editar</button>
@@ -168,22 +215,22 @@ function renderizarLocacoes() {
 function renderizarFilmes() {
     document.querySelector("#totalFilmes").textContent = filmes.length;
 
-    document.querySelector("#listaFilmes").innerHTML = filmes.map((filme) => {
+    document.querySelector("#listaFilmes").innerHTML = filmes.length === 0
+        ? '<tr><td class="texto-suave text-center py-4" colspan="6">Nenhum filme cadastrado.</td></tr>'
+        : filmes.map((filme) => {
         const disponiveis = filme.estoque - contarLocacoesAtivas(filme.id);
         return `
-            <div class="col-md-6 col-lg-4">
-                <article class="card filme h-100">
-                    <div class="capa ${filme.capa}" aria-hidden="true"></div>
-                    <div class="card-body">
-                        <span class="badge text-bg-dark">${filme.genero} · 18+</span>
-                        <h3 class="h5 mt-3">${filme.titulo}</h3>
-                        <p class="texto-suave">R$ ${filme.preco.toFixed(2).replace(".", ",")}</p>
-                        <span class="badge ${disponiveis > 0 ? "text-bg-success" : "text-bg-secondary"}">
-                            ${disponiveis} de ${filme.estoque} disponíveis
-                        </span>
-                    </div>
-                </article>
-            </div>`;
+            <tr>
+                <td>${escaparHTML(filme.titulo)}</td>
+                <td>${escaparHTML(filme.genero)}</td>
+                <td>${Number(filme.preco).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</td>
+                <td>${filme.estoque}</td>
+                <td>${disponiveis}</td>
+                <td class="text-end text-nowrap">
+                    <button class="btn btn-sm btn-outline-primary me-1" type="button" data-acao-filme="editar" data-id="${filme.id}">Editar</button>
+                    <button class="btn btn-sm btn-outline-danger" type="button" data-acao-filme="excluir" data-id="${filme.id}">Excluir</button>
+                </td>
+            </tr>`;
     }).join("");
 }
 
@@ -196,6 +243,15 @@ function limparFormulario() {
     document.querySelector("#cancelarEdicao").classList.add("d-none");
     campoDataInicio.value = dataHoje();
     campoDataFim.value = adicionarDias(dataHoje(), 7);
+}
+
+function limparFormularioFilme() {
+    formFilme.reset();
+    formFilme.classList.remove("was-validated");
+    document.querySelector("#filmeId").value = "";
+    document.querySelector("#tituloFormularioFilme").textContent = "Novo filme";
+    document.querySelector("#botaoSalvarFilme").textContent = "Salvar";
+    document.querySelector("#cancelarEdicaoFilme").classList.add("d-none");
 }
 
 function validarFormulario() {
@@ -263,6 +319,89 @@ formLocacao.addEventListener("submit", (evento) => {
     salvarLocacoes();
     limparFormulario();
     renderizarLocacoes();
+});
+
+formFilme.addEventListener("submit", (evento) => {
+    evento.preventDefault();
+    const idAtual = Number(document.querySelector("#filmeId").value) || null;
+    const titulo = document.querySelector("#tituloFilme").value.trim();
+    const genero = document.querySelector("#generoFilme").value.trim();
+    const preco = Number(document.querySelector("#precoFilme").value);
+    const estoque = Number(document.querySelector("#estoqueFilme").value);
+    const tituloInput = document.querySelector("#tituloFilme");
+
+    tituloInput.setCustomValidity("");
+    if (filmes.some((filme) => filme.id !== idAtual && filme.titulo.toLocaleLowerCase("pt-BR") === titulo.toLocaleLowerCase("pt-BR"))) {
+        tituloInput.setCustomValidity("Já existe um filme com esse título.");
+    }
+    formFilme.classList.add("was-validated");
+    if (!formFilme.checkValidity()) {
+        formFilme.reportValidity();
+        return;
+    }
+
+    if (idAtual && estoque < contarLocacoesAtivas(idAtual)) {
+        mostrarMensagem("O estoque não pode ser menor que as locações em andamento.", "warning", mensagemFilmes);
+        return;
+    }
+
+    const dadosFilme = {
+        id: idAtual || Math.max(0, ...filmes.map((filme) => filme.id)) + 1,
+        titulo,
+        genero,
+        preco,
+        estoque
+    };
+
+    if (idAtual) {
+        filmes = filmes.map((filme) => filme.id === idAtual ? dadosFilme : filme);
+        mostrarMensagem("Filme atualizado com sucesso.", "success", mensagemFilmes);
+    } else {
+        filmes.push(dadosFilme);
+        mostrarMensagem("Filme cadastrado com sucesso.", "success", mensagemFilmes);
+    }
+
+    salvarFilmes();
+    preencherOpcoes();
+    limparFormularioFilme();
+    renderizarLocacoes();
+});
+
+document.querySelector("#cancelarEdicaoFilme").addEventListener("click", limparFormularioFilme);
+
+document.querySelector("#listaFilmes").addEventListener("click", (evento) => {
+    const botao = evento.target.closest("button[data-acao-filme]");
+    if (!botao) return;
+
+    const id = Number(botao.dataset.id);
+    const filme = buscarFilme(id);
+    if (!filme) return;
+
+    if (botao.dataset.acaoFilme === "editar") {
+        document.querySelector("#filmeId").value = filme.id;
+        document.querySelector("#tituloFilme").value = filme.titulo;
+        document.querySelector("#generoFilme").value = filme.genero;
+        document.querySelector("#precoFilme").value = filme.preco;
+        document.querySelector("#estoqueFilme").value = filme.estoque;
+        document.querySelector("#tituloFormularioFilme").textContent = "Editar filme";
+        document.querySelector("#botaoSalvarFilme").textContent = "Salvar alterações";
+        document.querySelector("#cancelarEdicaoFilme").classList.remove("d-none");
+        document.querySelector("#catalogo").scrollIntoView({ behavior: "smooth" });
+    }
+
+    if (botao.dataset.acaoFilme === "excluir") {
+        if (locacoes.some((locacao) => locacao.filmeId === id)) {
+            mostrarMensagem("Não é possível excluir um filme que tem locações registradas.", "warning", mensagemFilmes);
+            return;
+        }
+        if (window.confirm("Deseja excluir este filme?")) {
+            filmes = filmes.filter((item) => item.id !== id);
+            salvarFilmes();
+            preencherOpcoes();
+            renderizarLocacoes();
+            mostrarMensagem("Filme excluído.", "success", mensagemFilmes);
+        }
+    }
 });
 
 listaLocacoes.addEventListener("click", (evento) => {
