@@ -16,6 +16,7 @@ Para executar localmente, abra `index.html` no navegador. O Bootstrap é carrega
 - Pesquisa por cliente ou filme, filtros combinados por situação e gênero e ordenação.
 - Dados de filmes e locações guardados no `localStorage` do navegador.
 - Multa de R$ 2 por dia de atraso. Ao devolver o filme, o valor é calculado até a data da devolução.
+- Renovação de uma locação em dia por mais sete dias, permitida uma única vez.
 
 ## Regras do sistema
 
@@ -24,26 +25,15 @@ Para executar localmente, abra `index.html` no navegador. O Bootstrap é carrega
 - O estoque não pode ficar abaixo da quantidade de locações em andamento.
 - Um filme ligado a qualquer locação não pode ser excluído, para manter o histórico.
 - Uma locação devolvida não pode ser reaberta.
+- Uma locação pode ser renovada uma vez, antes do vencimento e antes de ser devolvida.
 - Os dados ficam somente no navegador em que foram cadastrados; não há servidor ou conta de usuário.
 
 ## Publicação no GitHub Pages
 
 O workflow em `.github/workflows/pages.yml` publica automaticamente o conteúdo do repositório quando há um push para a branch `etapa2`. Para conferir uma publicação, abra a aba **Actions** do GitHub e aguarde o workflow terminar. Nas configurações do repositório, em **Settings > Pages**, a origem deve estar definida como **GitHub Actions**.
 
-## Responsabilidades da equipe
-
-Substitua `[integrante]` pelos nomes antes da entrega:
-
-| Integrante | Responsabilidade |
-| --- | --- |
-| [integrante] | Dashboard, contadores e apresentação dos dados |
-| [integrante] | Cadastro e manutenção de filmes e locações |
-| [integrante] | Regras de negócio, validações e cálculo de multa |
-| [integrante] | Testes responsivos, documentação e publicação no GitHub Pages |
-
 ## Arquivos
 
 - `index.html`: estrutura e formulários da página.
 - `css/style.css`: estilos e ajuste para telas menores.
 - `js/main.js`: dados, regras e interações.
-- `.github/workflows/pages.yml`: publicação automática.
