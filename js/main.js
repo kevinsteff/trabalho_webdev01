@@ -122,6 +122,20 @@ function contarLocacoesAtivas(filmeId, ignorarId = null) {
     ).length;
 }
 
+function renovarLocacao(id) {
+    const locacao = locacoes.find((item) => item.id === id);
+    if (!locacao || locacao.devolvidoEm || locacao.renovada || obterSituacao(locacao) !== "Alugado") {
+        return false;
+    }
+
+    locacoes = locacoes.map((item) => item.id === id
+        ? { ...item, dataFim: adicionarDias(item.dataFim, 7), renovada: true }
+        : item
+    );
+    salvarLocacoes();
+    return true;
+}
+
 function preencherOpcoes() {
     campoCliente.innerHTML = '<option value="">Escolha um cliente</option>';
     clientes.forEach((cliente) => {
@@ -188,6 +202,8 @@ function renderizarLocacoes() {
                 situacao === "Atrasado" ? "text-bg-warning" : "text-bg-secondary";
             const botaoDevolver = locacao.devolvidoEm ? "" :
                 `<button class="btn btn-sm btn-outline-success me-1" type="button" data-acao="devolver" data-id="${locacao.id}">Devolver</button>`;
+            const botaoRenovar = situacao === "Alugado" && !locacao.renovada ?
+                `<button class="btn btn-sm btn-outline-warning me-1" type="button" data-acao="renovar" data-id="${locacao.id}" title="Prorrogar o prazo em sete dias">Renovar (+7 dias)</button>` : "";
 
             return `
                 <tr>
@@ -198,6 +214,7 @@ function renderizarLocacoes() {
                     <td><span class="badge ${classeSituacao}">${situacao}</span></td>
                     <td>${multa.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</td>
                     <td class="text-end text-nowrap">
+                        ${botaoRenovar}
                         ${botaoDevolver}
                         <button class="btn btn-sm btn-outline-primary me-1" type="button" data-acao="editar" data-id="${locacao.id}">Editar</button>
                         <button class="btn btn-sm btn-outline-danger" type="button" data-acao="excluir" data-id="${locacao.id}">Excluir</button>
@@ -305,7 +322,8 @@ formLocacao.addEventListener("submit", (evento) => {
         dataInicio: campoDataInicio.value,
         dataFim: campoDataFim.value,
         criadaEm: locacaoAtual?.criadaEm || Date.now(),
-        devolvidoEm: locacaoAtual?.devolvidoEm || null
+        devolvidoEm: locacaoAtual?.devolvidoEm || null,
+        renovada: locacaoAtual?.renovada || false
     };
 
     if (idAtual) {
@@ -429,6 +447,15 @@ listaLocacoes.addEventListener("click", (evento) => {
         salvarLocacoes();
         renderizarLocacoes();
         mostrarMensagem("Filme marcado como devolvido.");
+    }
+
+    if (botao.dataset.acao === "renovar") {
+        if (renovarLocacao(id)) {
+            renderizarLocacoes();
+            mostrarMensagem("Prazo renovado por mais 7 dias.");
+        } else {
+            mostrarMensagem("Esta locação não pode ser renovada.", "warning");
+        }
     }
 
     if (botao.dataset.acao === "excluir" && window.confirm("Deseja excluir esta locação?")) {
