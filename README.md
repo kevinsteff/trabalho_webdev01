@@ -28,10 +28,6 @@ Para executar localmente, abra `index.html` no navegador. O Bootstrap é carrega
 - Uma locação pode ser renovada uma vez, antes do vencimento e antes de ser devolvida.
 - Os dados ficam somente no navegador em que foram cadastrados; não há servidor ou conta de usuário.
 
-## Publicação no GitHub Pages
-
-O workflow em `.github/workflows/pages.yml` publica automaticamente o conteúdo do repositório quando há um push para a branch `etapa2`. Para conferir uma publicação, abra a aba **Actions** do GitHub e aguarde o workflow terminar. Nas configurações do repositório, em **Settings > Pages**, a origem deve estar definida como **GitHub Actions**.
-
 ## Arquivos
 
 - `index.html`: estrutura e formulários da página.
